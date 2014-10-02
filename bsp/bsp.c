@@ -19,6 +19,7 @@
 GPIO_TypeDef* leds_port[] = { GPIOD, GPIOD, GPIOD, GPIOD };
 /* Leds disponibles */
 const uint16_t leds[] = { LED_V, LED_R, LED_N, LED_A };
+uint32_t* const leds_pwm[] = { &TIM4->CCR1, &TIM4->CCR3, &TIM4->CCR2, &TIM4->CCR4 };
 
 extern void APP_ISR_sw(void);
 extern void APP_ISR_1ms(void);
@@ -41,6 +42,11 @@ uint8_t sw_getState(void) {
 	return GPIO_ReadInputDataBit(GPIOA, BOTON);
 }
 
+void led_setBright(uint8_t led, uint8_t value){
+	*leds_pwm[led] = (10000*value)/100;
+
+
+}
 void bsp_delayMs(uint16_t x) {
 	bsp_contMS = x;
 
@@ -82,7 +88,9 @@ void bsp_sw_init();
 void bsp_timer_config();
 
 void bsp_init() {
-	bsp_led_init();
+	//bsp_led_init();
+
+	bsp_pwm_config();
 	bsp_sw_init();
 	bsp_timer_config();
 
@@ -176,6 +184,9 @@ void bsp_pwm_config(void){
 
 	TIM_TimeBaseInitTypeDef TIM_Config;
 	GPIO_InitTypeDef GPIO_Config;
+	TIM_OCInitTypeDef TIM_OC_config;
+
+	//uint16_t PrescalerValue = (uint16_t)((SystemCoreClock/2)/2100000) ;
 
 	GPIO_Config.GPIO_Mode = GPIO_Mode_AF;
 	GPIO_Config.GPIO_Pin = GPIO_Pin_15 | GPIO_Pin_14 | GPIO_Pin_13 | GPIO_Pin_12;
@@ -185,9 +196,50 @@ void bsp_pwm_config(void){
 
 	GPIO_Init(GPIOD , &GPIO_Config);
 
+
+	GPIO_PinAFConfig(GPIOD, GPIO_Pin_15, GPIO_AF_TIM4);
+	GPIO_PinAFConfig(GPIOD, GPIO_Pin_14, GPIO_AF_TIM4);
+	GPIO_PinAFConfig(GPIOD, GPIO_Pin_13, GPIO_AF_TIM4);
+	GPIO_PinAFConfig(GPIOD, GPIO_Pin_12, GPIO_AF_TIM4);
+
 	TIM_Config.TIM_CounterMode = TIM_CounterMode_Up;
 	TIM_Config.TIM_ClockDivision = 0;
-	TIM_Config.TIM_Period = x;
-	TIM_Config.TIM_Prescaler = x;
+	TIM_Config.TIM_Period = 10000;
+	TIM_Config.TIM_Prescaler = 16-1;
+	TIM_TimeBaseInit(TIM4, &TIM_Config);
 
+
+
+	TIM_OC_config.TIM_OCMode = TIM_OCMode_PWM1;
+	TIM_OC_config.TIM_OutputState = TIM_OutputState_Enable;
+	TIM_OC_config.TIM_Pulse = 0;
+	TIM_OC_config.TIM_OCPolarity = TIM_OCPolarity_High;
+
+	//CH1 del pwm
+	TIM_OC1Init(TIM4, &TIM_OC_config);
+	TIM_OC1PreloadConfig(TIM4,TIM_OCPreload_Enable);
+
+	///CH2 del pwm
+	TIM_OC_config.TIM_OutputState = TIM_OutputState_Enable;
+	TIM_OC_config.TIM_Pulse = 0;
+
+	TIM_OC2Init(TIM4, &TIM_OC_config);
+	TIM_OC2PreloadConfig(TIM4,TIM_OCPreload_Enable);
+
+	///CH3 del pwm
+	TIM_OC_config.TIM_OutputState = TIM_OutputState_Enable;
+	TIM_OC_config.TIM_Pulse = 0;
+
+	TIM_OC3Init(TIM4, &TIM_OC_config);
+	TIM_OC3PreloadConfig(TIM4,TIM_OCPreload_Enable);
+
+	///CH4 del pwm
+	TIM_OC_config.TIM_OutputState = TIM_OutputState_Enable;
+	TIM_OC_config.TIM_Pulse = 0;
+
+	TIM_OC4Init(TIM4, &TIM_OC_config);
+	TIM_OC4PreloadConfig(TIM4,TIM_OCPreload_Enable);
+
+	TIM_ARRPreloadConfig(TIM4, ENABLE);
+	TIM_Cmd(TIM4, ENABLE);
 }
