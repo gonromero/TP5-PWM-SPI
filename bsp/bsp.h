@@ -21,7 +21,11 @@ void led_off(uint8_t led);
  * @param led Led a apagar
  */
 void led_toggle(uint8_t led);
+/**
+ * @brief acelerometro
+ */
 
+float bsp_get_acc(uint8_t eje);
 /**
  * @brief Delay por software
  */
@@ -33,6 +37,8 @@ void led_setBright(uint8_t led, uint8_t value);
  * @brief Inicializacion de los servicios de BSP
  */
 void bsp_init();
+
+
 
 /**
  * @brief Delay de x ms
