@@ -15,60 +15,37 @@ void Delay(volatile uint32_t nCount);
  * @param tiempo Numero de ciclos del delay entre prendido y apagado
  */
 void pulsoLed(uint8_t led, uint32_t tiempo);
+void vumetro(uint16_t led);
 
 /**
  * @brief Aplicacion principal
  */
 int main(void) {
 	bsp_init();
-	int brillo = 0;
+	uint16_t potenciometro;
 	int flag = 0;
-
-	float acc_x;
-	float acc_y;
-
 	while (1) {
 
-		bsp_delayMs(50);
-		//led_setBright(0, brillo);
-		led_setBright(1, brillo);
-		led_setBright(2, brillo);
-		led_setBright(3, brillo);
+		potenciometro=leer_pote();
+		vumetro(potenciometro);
 
-		if (brillo >= 100)
-			flag = 0;
 
-		if (brillo <= 100)
-			flag = 1;
 
-		if (flag)
-			brillo++;
-		else
-			brillo--;
-
-		acc_x = bsp_get_acc('x');
-		acc_x = acc_x * 100;
-		acc_z = bsp_get_acc('z');
-		acc_z = acc_z * 100;
-
-		if (acc_x < 0) {
-			acc_x = acc_x * (-1);
-			led_setBright(0, acc_x);
-			led_setBright(1, 0);
-		} else {
-			led_setBright(0, 0);
-			led_setBright(1, acc_x);
-		}
-
-		if (acc_z < 0) {
-			acc_z = acc_z * (-1);
-			led_setBright(2, acc_z);
-			led_setBright(3, 0);
-		} else {
-			led_setBright(2, 0);
-			led_setBright(3, acc_z);
-		}
 	}
+}
+void vumetro(uint16_t led){
+	uint8_t i;
+
+for(i=3;i<(led+4);i++){
+	led_on(i);
+}
+for(i=(led+4);i<12;i++){
+	led_off(i);
+
+}
+
+
+
 }
 
 
